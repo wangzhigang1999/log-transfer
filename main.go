@@ -48,10 +48,12 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		num, err := stream.Read(buf)
 
 		if err == io.EOF {
+			log.Println("stream end")
 			break
 		}
 
 		if num == 0 {
+			log.Println("no data")
 			time.Sleep(1 * time.Second)
 		}
 
