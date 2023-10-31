@@ -6,12 +6,21 @@ import (
 	"log"
 	"log-transfer/util"
 	"net/http"
+	"sync"
 	"time"
 )
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+}
+
+var allowNamespace = sync.Map{}
+
+func init() {
+	allowNamespace.Store("schedule", true)
+	allowNamespace.Store("train-job", true)
+	allowNamespace.Store("wanz", true)
 }
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +47,14 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	if req.Namespace == "" || req.Pod == "" {
 		log.Println("wrong request lack of namespace or pod name")
+		ws.WriteMessage(websocket.TextMessage, []byte("wrong request lack of namespace or pod name"))
+		return
+	}
+
+	// check namespace
+	if _, ok := allowNamespace.Load(req.Namespace); !ok {
+		log.Println("namespace not allowed")
+		ws.WriteMessage(websocket.TextMessage, []byte("namespace not allowed"))
 		return
 	}
 
