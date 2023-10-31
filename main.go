@@ -2,9 +2,11 @@ package main
 
 import (
 	"github.com/gorilla/websocket"
+	"io"
 	"log"
 	"log-transfer/util"
 	"net/http"
+	"time"
 )
 
 var upgrader = websocket.Upgrader{
@@ -38,21 +40,31 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	podLog := util.GetPodLog(req.Pod, req.Namespace)
-	defer podLog.Close()
+	stream := util.GetPodLog(req.Pod, req.Namespace)
+	defer stream.Close()
 
 	for {
-		buf := make([]byte, 1024)
-		num, err := podLog.Read(buf)
+		buf := make([]byte, 2048)
+		num, err := stream.Read(buf)
+
+		if err == io.EOF {
+			break
+		}
+
+		if num == 0 {
+			time.Sleep(1 * time.Second)
+		}
+
 		if err != nil {
 			log.Println(err)
-			return
+			break
 		}
 		err = ws.WriteMessage(websocket.TextMessage, buf[:num])
 		if err != nil {
 			log.Println(err)
-			return
+			break
 		}
+
 	}
 
 }
