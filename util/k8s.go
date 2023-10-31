@@ -10,6 +10,8 @@ import (
 	"log"
 )
 
+var client = *NewK8SClient()
+
 // NewK8SClient  This will create a new client for us to connect with k8s
 // Be sure to add service account to your pod
 func NewK8SClient() *kubernetes.Clientset {
@@ -37,8 +39,7 @@ func NewK8SClient() *kubernetes.Clientset {
 
 // GetPodLog get pod log
 func GetPodLog(podName string, namespace string) io.ReadCloser {
-	client := NewK8SClient()
-	logOptions := &v1.PodLogOptions{}
+	logOptions := &v1.PodLogOptions{Follow: true}
 	req := client.CoreV1().Pods(namespace).GetLogs(podName, logOptions)
 	podLogs, err := req.Stream(context.Background())
 	if err != nil {
