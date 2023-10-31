@@ -47,7 +47,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Namespace == "" || req.Pod == "" {
+	if req.Namespace == "" || req.Workload == "" {
 		log.Println("wrong request lack of namespace or pod name")
 		ws.WriteMessage(websocket.TextMessage, []byte("wrong request lack of namespace or pod name"))
 		return
@@ -64,13 +64,18 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	if req.TailLines <= 0 || req.TailLines > 100 {
 		req.TailLines = 100
 	}
+	var stream io.ReadCloser
+	if req.Mode == "job" {
+		stream, err = util.GetJobLog(req.Workload, req.Namespace, &req.TailLines)
+	} else {
+		stream, err = util.GetPodLog(req.Workload, req.Namespace, &req.TailLines)
+	}
 
-	stream, error := util.GetPodLog(req.Pod, req.Namespace, &req.TailLines)
 	defer stream.Close()
 
-	if error != nil {
-		log.Println(error)
-		ws.WriteMessage(websocket.TextMessage, []byte("get log error,error:"+error.Error()))
+	if err != nil {
+		log.Println(err)
+		ws.WriteMessage(websocket.TextMessage, []byte("get log error,error:"+err.Error()))
 		return
 	}
 
@@ -109,6 +114,7 @@ func main() {
 
 type Request struct {
 	Namespace string `json:"namespace"`
-	Pod       string `json:"pod"`
+	Workload  string `json:"workload"`
 	TailLines int64  `json:"tailLines"`
+	Mode      string `json:"mode"`
 }

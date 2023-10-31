@@ -2,8 +2,10 @@ package util
 
 import (
 	"context"
+	"errors"
 	"io"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -45,4 +47,20 @@ func GetPodLog(podName string, namespace string, limit *int64) (io.ReadCloser, e
 	}
 	req := client.CoreV1().Pods(namespace).GetLogs(podName, logOptions)
 	return req.Stream(context.Background())
+}
+
+// get job log
+func GetJobLog(jobName string, namespace string, limit *int64) (io.ReadCloser, error) {
+
+	// find pod with label job-name=jobName
+	pods, err := client.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
+		LabelSelector: "job-name=" + jobName,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(pods.Items) == 0 {
+		return nil, errors.New("no pod found")
+	}
+	return GetPodLog(pods.Items[0].Name, namespace, limit)
 }
