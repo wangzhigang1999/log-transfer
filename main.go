@@ -43,6 +43,8 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	err = ws.ReadJSON(&req)
 	if err != nil {
 		log.Println(err)
+		ws.WriteMessage(websocket.TextMessage, []byte("wrong request"))
+		return
 	}
 
 	if req.Namespace == "" || req.Pod == "" {
@@ -63,8 +65,14 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		req.TailLines = 100
 	}
 
-	stream := util.GetPodLog(req.Pod, req.Namespace, &req.TailLines)
+	stream, error := util.GetPodLog(req.Pod, req.Namespace, &req.TailLines)
 	defer stream.Close()
+
+	if error != nil {
+		log.Println(error)
+		ws.WriteMessage(websocket.TextMessage, []byte("get log error,error:"+error.Error()))
+		return
+	}
 
 	for {
 		buf := make([]byte, 2048)

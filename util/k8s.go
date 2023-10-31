@@ -38,15 +38,11 @@ func NewK8SClient() *kubernetes.Clientset {
 }
 
 // GetPodLog get pod log
-func GetPodLog(podName string, namespace string, limit *int64) io.ReadCloser {
+func GetPodLog(podName string, namespace string, limit *int64) (io.ReadCloser, error) {
 	logOptions := &v1.PodLogOptions{
 		Follow:    true,
 		TailLines: limit,
 	}
 	req := client.CoreV1().Pods(namespace).GetLogs(podName, logOptions)
-	podLogs, err := req.Stream(context.Background())
-	if err != nil {
-		log.Println("Error in opening stream", err)
-	}
-	return podLogs
+	return req.Stream(context.Background())
 }
