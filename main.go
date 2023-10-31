@@ -16,6 +16,7 @@ var upgrader = websocket.Upgrader{
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
+		log.Println(r.Host)
 		return true
 	}
 
@@ -40,7 +41,12 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stream := util.GetPodLog(req.Pod, req.Namespace)
+	// tail line must be positive and less than 100
+	if req.TailLines <= 0 || req.TailLines > 100 {
+		req.TailLines = 100
+	}
+
+	stream := util.GetPodLog(req.Pod, req.Namespace, &req.TailLines)
 	defer stream.Close()
 
 	for {
@@ -79,4 +85,5 @@ func main() {
 type Request struct {
 	Namespace string `json:"namespace"`
 	Pod       string `json:"pod"`
+	TailLines int64  `json:"tailLines"`
 }
