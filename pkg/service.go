@@ -35,7 +35,12 @@ func TransferLog(ws *websocket.Conn, req *ReaderMSG) {
 		buf := make([]byte, 2048)
 		num, err := stream.Read(buf)
 
-		if err != nil {
+		if err == io.EOF {
+			_ = ws.WriteMessage(websocket.TextMessage, []byte("\nNo more content to read. Typically this means the container has crashed or the job has finished running."))
+			return
+		}
+
+		if err != nil && err != io.EOF {
 			slog.Error("read log error", "reason", err)
 			_ = ws.WriteMessage(websocket.TextMessage, []byte("read log error,error:"+err.Error()))
 			return
