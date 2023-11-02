@@ -1,4 +1,4 @@
-package util
+package pkg
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"log"
+	"log/slog"
 )
 
 var client = *NewK8SClient()
@@ -20,22 +20,22 @@ func NewK8SClient() *kubernetes.Clientset {
 	// creates the in-cluster configs
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		log.Println("Error in creating in-cluster config,will try to read kubeconfig")
+		slog.Error("Error in creating in-cluster config,will try to read kubeconfig", "error", err)
 		// read kubeconfig
-		config, err = clientcmd.BuildConfigFromFlags("", "aiops.yaml")
+		config, err = clientcmd.BuildConfigFromFlags("", "config")
 		if err != nil {
-			log.Println("Error in reading kubeconfig", err)
+			slog.Error("Error in reading kubeconfig", "error", err)
 		}
 	}
 
-	log.Println("Successfully read kubeconfig")
+	slog.Info("Successfully created cluster config")
 	// creates the client
 	client, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		log.Println("Error in creating client", err)
+		slog.Error("Error in creating client", "error", err)
 		panic(err.Error())
 	}
-	log.Println("Successfully created client")
+	slog.Info("Successfully created client")
 	return client
 }
 
@@ -49,7 +49,7 @@ func GetPodLog(podName string, namespace string, limit *int64) (io.ReadCloser, e
 	return req.Stream(context.Background())
 }
 
-// get job log
+// GetJobLog get job log
 func GetJobLog(jobName string, namespace string, limit *int64) (io.ReadCloser, error) {
 
 	// find pod with label job-name=jobName
