@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func TransferLog(ws *websocket.Conn, req *ReaderMSG) {
+func TransferLog(ws *websocket.Conn, req *TargetWorkloadMSG) {
 
 	if req.TailLines <= 0 || req.TailLines > MaxTailLines {
 		req.TailLines = MaxTailLines
@@ -55,7 +55,7 @@ func TransferLog(ws *websocket.Conn, req *ReaderMSG) {
 	}
 }
 
-func HandleRequest(ws *websocket.Conn, msg *ReaderMSG) error {
+func HandleRequest(ws *websocket.Conn, msg *TargetWorkloadMSG) error {
 	errorCount := 0
 	for {
 		// do not read message from client if error count is greater than MaxErrorCount

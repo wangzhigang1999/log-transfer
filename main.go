@@ -35,7 +35,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	// log conn details
 	slog.Info("client Connected.", "remote addr", ws.RemoteAddr().String())
 
-	target := svc.ReaderMSG{}
+	target := svc.TargetWorkloadMSG{}
 
 	err = svc.HandleRequest(ws, &target)
 	if err != nil {

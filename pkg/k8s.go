@@ -13,6 +13,7 @@ import (
 )
 
 var client = *NewK8SClient()
+var kubeconfig = "config"
 
 // NewK8SClient  This will create a new client for us to connect with k8s
 // Be sure to add service account to your pod
@@ -22,7 +23,7 @@ func NewK8SClient() *kubernetes.Clientset {
 	if err != nil {
 		slog.Error("Error in creating in-cluster config,will try to read kubeconfig", "error", err)
 		// read kubeconfig
-		config, err = clientcmd.BuildConfigFromFlags("", "config")
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 		if err != nil {
 			slog.Error("Error in reading kubeconfig", "error", err)
 		}

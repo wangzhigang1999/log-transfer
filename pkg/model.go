@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-type ReaderMSG struct {
+type TargetWorkloadMSG struct {
 	Namespace string `json:"namespace"`
 	Workload  string `json:"workload"`
 	TailLines int64  `json:"tailLines"`
@@ -18,9 +18,7 @@ var allowNamespace = sync.Map{}
 var disallowNamespace = sync.Map{}
 
 var allowNamespaceRegList = []string{
-	"wanz",
-	"schedule",
-	"train-job",
+	".*",
 }
 
 var MaxTailLines = int64(100)
@@ -33,7 +31,7 @@ const (
 	ModeJob = "job"
 )
 
-func (r *ReaderMSG) Valid() (bool, error) {
+func (r *TargetWorkloadMSG) Valid() (bool, error) {
 	if r.Namespace == "" || r.Workload == "" {
 		return false, errors.New("namespace and workload must not be empty")
 	}
@@ -51,26 +49,26 @@ func (r *ReaderMSG) Valid() (bool, error) {
 }
 
 func allowAccess(ns string) bool {
-	// 允许的 namespace
+	// namespace allow cache
 	if _, ok := allowNamespace.Load(ns); ok {
 		return true
 	}
 
-	// 不允许的 namespace
+	// namespace  disallow cache
 	if _, ok := disallowNamespace.Load(ns); ok {
 		return false
 	}
 
-	//  不知道，需要判断
+	//  check whether the namespace is allowed
 	for _, reg := range allowNamespaceRegList {
 		if ok, _ := regexp.MatchString(reg, ns); ok {
-			// 判断通过，添加到允许列表
+			// the namespace is allowed,add to allow cache
 			allowNamespace.Store(ns, true)
 			return true
 		}
 	}
 
-	// 否则添加到不允许列表
+	// the namespace is not allowed,add to disallow cache
 	disallowNamespace.Store(ns, true)
 	return false
 }
