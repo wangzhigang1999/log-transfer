@@ -39,10 +39,9 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	err = svc.HandleRequest(ws, &target)
 	if err != nil {
+		slog.Error("handle request error", "error", err)
 		return
 	}
-
-	go svc.HandleCMD(ws)
 
 	svc.TransferLog(ws, &target)
 }

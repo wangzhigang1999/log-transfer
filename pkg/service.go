@@ -60,14 +60,13 @@ func HandleRequest(ws *websocket.Conn, msg *ReaderMSG) error {
 	for {
 		// do not read message from client if error count is greater than MaxErrorCount
 		if errorCount >= MaxErrorCount {
-			slog.Error("error count is greater than MaxErrorCount,close connection")
-			return errors.New("wrong request,please check your request format")
+			return errors.New("error count is greater than MaxErrorCount")
 		}
 
 		err := ws.ReadJSON(&msg)
 		if err != nil {
 			slog.Warn("wrong request", "reason", err)
-			_ = ws.WriteMessage(websocket.TextMessage, []byte("wrong request,please check your request format."))
+			_ = ws.WriteMessage(websocket.TextMessage, []byte("wrong request,error:"+err.Error()))
 			errorCount++
 			continue
 		}
@@ -80,8 +79,10 @@ func HandleRequest(ws *websocket.Conn, msg *ReaderMSG) error {
 		}
 
 		slog.Info("accept request", "request", msg)
-		return nil
+		break
 	}
+	go HandleCMD(ws)
+	return nil
 }
 
 func HandleCMD(ws *websocket.Conn) {

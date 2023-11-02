@@ -35,7 +35,7 @@ stages:
               tags: '$(Build.BuildNumber)-$(SHORT_COMMIT)'
               Dockerfile: '**/Dockerfile'
 
-          - script: |
-              curl --location --request PUT --X PUT 'http://cd.bupt.site:30303/api/v1/deployments' --header 'Content-Type: application/json'  --header 'key: kAmAbNuzrilmUjcrjsZtOoMcenqoKdQpVeOHVEvpGCBoqxoEQcHOgFIHLzEHJAUU'    --header 'value: token-wanz-ws-log-transfer-container-0-3e1f9cc2'      --data '{ "namespace":"wanz","deployment":"ws-log-transfer","container": "container-0","image": "registry.cn-beijing.aliyuncs.com/$(image-repo):$(Build.BuildNumber)-$(SHORT_COMMIT)"}'           
-            displayName: 'send curl'
+#          - script: |
+#              curl --location --request PUT --X PUT 'http://cd.bupt.site:30303/api/v1/deployments' --header 'Content-Type: application/json'  --header 'key: kAmAbNuzrilmUjcrjsZtOoMcenqoKdQpVeOHVEvpGCBoqxoEQcHOgFIHLzEHJAUU'    --header 'value: token-wanz-ws-log-transfer-container-0-3e1f9cc2'      --data '{ "namespace":"wanz","deployment":"ws-log-transfer","container": "container-0","image": "registry.cn-beijing.aliyuncs.com/$(image-repo):$(Build.BuildNumber)-$(SHORT_COMMIT)"}'
+#            displayName: 'send curl'
 
