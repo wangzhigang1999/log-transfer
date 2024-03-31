@@ -16,7 +16,7 @@ It's recommended to build this project from source code. The code is extremely s
 
 If you run it in **k8s**, you need to **link a service account** to the pod in order to read the logs of other pods.
 
-If you run it **locally**, you need to  **specify the kubeconfig file path** in `pkg/k8s.go`.
+If you run it **locally**, you need to **specify the kubeconfig file path** in `pkg/k8s.go`.
 
 In `pkg/model.go`, you can config the namespace **white list** for safety. It's a regular expression list. By default, it's `".*"`, which
 means **all namespaces are allowed.**
@@ -48,20 +48,20 @@ limit set in the server, default is 100.
 > example client code
 
 ```typescript
-const socket = new WebSocket("localhost:8080");  // 创建一个 Socket 实例
+const socket = new WebSocket("localhost:8080"); // 创建一个 Socket 实例
 let data: any = {
-    "mode": "pod",
-    "namespace":"default",
-    "workload":"nginx-7db9fccd9f-4q9q2",
-    "tailLines":100
-}
+  mode: "pod",
+  namespace: "default",
+  workload: "nginx-7db9fccd9f-4q9q2",
+  tailLines: 100,
+};
 
 socket.onopen = function () {
   socket.send(JSON.stringify(data)); // 发送数据
-}
+};
 
-// 
+//
 socket.onmessage = function (msg) {
-  console.log(msg)
-}
+  console.log(msg);
+};
 ```
